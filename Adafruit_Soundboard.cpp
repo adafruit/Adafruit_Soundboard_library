@@ -1,3 +1,24 @@
+/*************************************************** 
+  This is a library for the Adafruit Sound Boards in UART mode
+
+  ----> http://www.adafruit.com/products/2342
+  ----> http://www.adafruit.com/products/2341
+  ----> http://www.adafruit.com/products/2217
+  ----> http://www.adafruit.com/products/2210
+  ----> http://www.adafruit.com/products/2133
+  ----> http://www.adafruit.com/products/2200
+
+  Check out the links above for our tutorials and wiring diagrams
+  This sound fx driver uses TTL Serial to communicate
+
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
+  products from Adafruit!
+
+  Written by Limor Fried/Ladyada for Adafruit Industries.
+  MIT license, all text above must be included in any redistribution
+ ****************************************************/
+
 #include "Adafruit_Soundboard.h"
 
 // Constructor
@@ -7,7 +28,6 @@ Adafruit_Soundboard::Adafruit_Soundboard(Stream *s, Stream *d, int8_t r)
   stream->setTimeout(500);
   writing = false;
   files = 0;
-
 }
 
 
@@ -122,14 +142,19 @@ boolean Adafruit_Soundboard::playTrack(uint8_t n) {
 
   readLine();
 
+#ifdef DEBUG
   Serial.print("<---"); Serial.println(line_buffer);
+#endif
 
   // check we got "play" back
-  if (strstr(line_buffer, "play") != line_buffer) {
+  if (strstr(line_buffer, "play") == 0) {
     return false;
   }
   // check the # is correct
   int playing = atoi(line_buffer+5);
+#ifdef DEBUG
+  Serial.print("# = "); Serial.println(playing);
+#endif
   if (n != playing) return false;
 
   return true;
@@ -145,7 +170,9 @@ boolean Adafruit_Soundboard::playTrack(char *name) {
 
   readLine();
 
+#ifdef DEBUG
   Serial.print("\n\r<--- "); Serial.println(line_buffer);
+#endif
 
   // check we got "play" back
   if (strstr(line_buffer, "play") != line_buffer) {

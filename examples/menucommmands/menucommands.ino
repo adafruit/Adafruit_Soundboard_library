@@ -1,5 +1,4 @@
 /* 
-
   Menu driven control of a sound board over UART.
   Commands for playing by # or by name (full 11-char name)
   Hard reset and List files (when not playing audio)
@@ -15,8 +14,8 @@
 
 
 // Choose any two pins that can be used with SoftwareSerial to RX & TX
-#define SFX_TX 2
-#define SFX_RX 3
+#define SFX_TX 5
+#define SFX_RX 6
 
 // Connect to the RST pin on the Sound Board
 #define SFX_RST 4
@@ -50,7 +49,7 @@ void setup() {
 
 
 void loop() {
-  flushSerial();
+  flushInput();
   
   Serial.println(F("What would you like to do?"));
   Serial.println(F("[r] - reset"));
@@ -68,7 +67,7 @@ void loop() {
   while (!Serial.available());
   char cmd = Serial.read();
   
-  flushSerial();
+  flushInput();
   
   switch (cmd) {
     case 'r': {
@@ -185,9 +184,16 @@ void loop() {
 
 /************************ MENU HELPERS ***************************/
 
-void flushSerial() {
-    while (Serial.available()) 
-    Serial.read();
+void flushInput() {
+  // Read all available serial input to flush pending data.
+  uint16_t timeoutloop = 0;
+  while (timeoutloop++ < 40) {
+    while(ss.available()) {
+      ss.read();
+      timeoutloop = 0;  // If char was received reset the timer
+    }
+    delay(1);
+  }
 }
 
 char readBlocking() {
