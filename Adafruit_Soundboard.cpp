@@ -21,6 +21,8 @@
 
 #include "Adafruit_Soundboard.h"
 
+//#define DEBUG 1
+
 // Constructor
 Adafruit_Soundboard::Adafruit_Soundboard(Stream *s, Stream *d, int8_t r) 
   : stream(s), debug(d), reset_pin(r) 
@@ -65,10 +67,15 @@ boolean Adafruit_Soundboard::reset(void) {
   
   // eat new line
   readLine();
+#ifdef DEBUG
+  Serial.println(line_buffer);   // Date and name
+#endif
 
   readLine();
   // "Adafruit FX Sound Board 9/10/14"
+#ifdef DEBUG
   Serial.println(line_buffer);   // Date and name
+#endif
   if (! strstr(line_buffer, "Adafruit FX Sound Board")) return false;
 
   delay(250);
@@ -167,6 +174,9 @@ boolean Adafruit_Soundboard::playTrack(char *name) {
   stream->print("P"); stream->println(name);
 
   readLine();  // eat return
+#ifdef DEBUG
+  Serial.print("\n\r<--- "); Serial.println(line_buffer);
+#endif
 
   readLine();
 
@@ -175,7 +185,7 @@ boolean Adafruit_Soundboard::playTrack(char *name) {
 #endif
 
   // check we got "play" back
-  if (strstr(line_buffer, "play") != line_buffer) {
+  if (strstr(line_buffer, "play") == 0) {
     return false;
   }
   return true;
