@@ -7,7 +7,7 @@
   ----> http://www.adafruit.com/products/2217
   ----> http://www.adafruit.com/products/2210
   ----> http://www.adafruit.com/products/2133
-  ----> http://www.adafruit.com/products/2200
+  ----> http://www.adafruit.com/products/2220
 
   Check out the links above for our tutorials and wiring diagrams
   This sound fx driver uses TTL Serial to communicate
