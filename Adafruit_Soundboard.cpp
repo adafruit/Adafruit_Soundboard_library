@@ -6,7 +6,7 @@
   ----> http://www.adafruit.com/products/2217
   ----> http://www.adafruit.com/products/2210
   ----> http://www.adafruit.com/products/2133
-  ----> http://www.adafruit.com/products/2200
+  ----> http://www.adafruit.com/products/2220
 
   Check out the links above for our tutorials and wiring diagrams
   This sound fx driver uses TTL Serial to communicate
@@ -43,7 +43,7 @@ int Adafruit_Soundboard::readLine(void) {
 }
 
 
-// Anything printed to Soundboard object will be split to both the WiFi
+// Anything printed to Soundboard object will be split to both the sound card
 // and debug streams.  Saves having to print everything twice in debug code.
 size_t Adafruit_Soundboard::write(uint8_t c) {
   if(debug) {
