@@ -45,8 +45,14 @@ void setup() {
     while (1);
   }
   Serial.println("SFX board found");
+  sfx.setVol(180);
 }
 
+void fileListItem(uint8_t id, const char* fileName, uint32_t fileSize){
+  Serial.print(id); 
+  Serial.print("\tname: "); Serial.print(fileName);
+  Serial.print("\tsize: "); Serial.println(fileSize);
+}
 
 void loop() {
   flushInput();
@@ -55,6 +61,7 @@ void loop() {
   Serial.println(F("[r] - reset"));
   Serial.println(F("[+] - Vol +"));
   Serial.println(F("[-] - Vol -"));
+  Serial.println(F("[V] - set volume (0-204)"));
   Serial.println(F("[L] - List files"));
   Serial.println(F("[P] - play by file name"));
   Serial.println(F("[#] - play by file number"));
@@ -78,18 +85,11 @@ void loop() {
     }
     
     case 'L': {
-      uint8_t files = sfx.listFiles();
-    
       Serial.println("File Listing");
       Serial.println("========================");
-      Serial.println();
-      Serial.print("Found "); Serial.print(files); Serial.println(" Files");
-      for (uint8_t f=0; f<files; f++) {
-        Serial.print(f); 
-        Serial.print("\tname: "); Serial.print(sfx.fileName(f));
-        Serial.print("\tsize: "); Serial.println(sfx.fileSize(f));
-      }
-      Serial.println("========================");
+      uint8_t nFiles = sfx.listFiles(fileListItem);
+      Serial.print("Found "); Serial.print(nFiles); Serial.println(" Files");
+      Serial.println("========================");  
       break; 
     }
     
@@ -138,6 +138,14 @@ void loop() {
       }
       break;
    }
+
+   case 'V': {
+      Serial.println("Vol...");
+      uint8_t v = readnumber();
+      Serial.print("Volume: "); 
+      Serial.println(v);
+      break;
+    }
    
    case '=': {
       Serial.println("Pausing...");

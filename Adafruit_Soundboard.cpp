@@ -29,7 +29,6 @@ Adafruit_Soundboard::Adafruit_Soundboard(Stream *s, Stream *d, int8_t r)
 {
   stream->setTimeout(500);
   writing = false;
-  files = 0;
 }
 
 
@@ -91,7 +90,7 @@ boolean Adafruit_Soundboard::reset(void) {
 
 
 // Query the board for the # of files and names/sizes
-uint8_t Adafruit_Soundboard::listFiles(void) {
+uint8_t Adafruit_Soundboard::listFiles(fileListHandler handler) {
   uint32_t filesize;
 
   while (stream->available())
@@ -99,43 +98,26 @@ uint8_t Adafruit_Soundboard::listFiles(void) {
 
   stream->println('L'); // 'L' for 'l'ist
 
-  files=0;
+  uint8_t nFiles = 0;
   
   while (stream->readBytesUntil('\n', line_buffer, LINE_BUFFER_SIZE)) {
-    // copy over the file name
-    memcpy(filenames[files], line_buffer, 12); 
-    filenames[files][11] = 0;
+    const char* filename = line_buffer;
+    line_buffer[11] = 0;
 
-    // parse out the file size after the name + tab
-    filesizes[files] = 0;
+    uint32_t size = 0;
     for (uint8_t i=0; i<16; i++) {
        uint8_t c = line_buffer[12 + i];
        if ((c > '9') || (c < '0')) {
            break;
        }
        
-       filesizes[files] *= 10;
-       
-       filesizes[files] += c - '0';
+       size *= 10;
+       size += c - '0';
     }
-    
-    files++;
-    if (files >= MAXFILES) break;
+    handler(nFiles, filename, size);
+    nFiles++;
   }
-  return files;
-}
-
-// for public consumption
-char * Adafruit_Soundboard::fileName(uint8_t n) {
-  if (n >= files)  return NULL;
-
-  return filenames[n];
-}
-
-uint32_t Adafruit_Soundboard::fileSize(uint8_t n) {
-  if (n >= files)  return 0;
-
-  return filesizes[n];
+  return nFiles;
 }
 
 
@@ -167,7 +149,7 @@ boolean Adafruit_Soundboard::playTrack(uint8_t n) {
   return true;
 }
 
-boolean Adafruit_Soundboard::playTrack(char *name) {
+boolean Adafruit_Soundboard::playTrack(const char *name) {
   while (stream->available())
     stream->read();
 
@@ -217,6 +199,19 @@ uint8_t Adafruit_Soundboard::volDown() {
 
   return v;
 }
+
+uint8_t Adafruit_Soundboard::setVol(uint8_t vol)
+{
+  vol = constrain(vol, 0, 204);
+  uint8_t current = 205;
+  while(current != vol) {
+    if (vol < current) 
+      current = volDown();
+    else
+      current = volUp();
+  }
+}
+
 
 boolean Adafruit_Soundboard::pause() {
   while (stream->available())

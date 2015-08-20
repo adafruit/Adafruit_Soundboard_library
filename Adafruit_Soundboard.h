@@ -24,27 +24,23 @@
 
 #include "Arduino.h"
 
-#define LINE_BUFFER_SIZE  80
-#define MAXFILES 25
+typedef void (*fileListHandler)(uint8_t id, const char* fileName, uint32_t fileSize);
 
 class Adafruit_Soundboard : public Print {
  public:
-  Adafruit_Soundboard(Stream *s, Stream *d, int8_t r);
+  Adafruit_Soundboard(Stream *stream, Stream *debug, int8_t r);
 
   boolean reset(void);
 
   int     readLine(void);
-  uint8_t listFiles(void);
-
-  char *fileName(uint8_t n);
-  uint32_t fileSize(uint8_t n);
-
+  uint8_t listFiles(fileListHandler handler);
 
   uint8_t volUp(void);
   uint8_t volDown(void);
+  uint8_t setVol(uint8_t vol);
 
   boolean playTrack(uint8_t n);
-  boolean playTrack(char *name);
+  boolean playTrack(const char *name);
   boolean pause(void);
   boolean unpause(void);
   boolean stop(void);
@@ -53,18 +49,14 @@ class Adafruit_Soundboard : public Print {
   boolean trackSize(uint32_t *current, uint32_t *total);
 
  private:
+  enum { LINE_BUFFER_SIZE = 80 };
+
   Stream   *stream;     // -> sound board, e.g. SoftwareSerial or Serial1
   Stream    *debug;      // -> host, e.g. Serial
   
   int8_t reset_pin;
   char line_buffer[LINE_BUFFER_SIZE];
   boolean writing;
-
-  // File name & size caching
-  uint8_t files;
-  char filenames[MAXFILES][12];
-  uint32_t filesizes[MAXFILES];
-
 
   virtual size_t write(uint8_t); // Because Print subclass
 };
