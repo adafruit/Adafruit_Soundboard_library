@@ -23,14 +23,18 @@
 // You can also monitor the ACT pin for when audio is playing!
 
 // we'll be using software serial
-SoftwareSerial ss = SoftwareSerial(SFX_TX, SFX_RX);
+SoftwareSerial ss(SFX_TX, SFX_RX);
 
 // pass the software serial to Adafruit_soundboard, the second
 // argument is the debug port (not used really) and the third 
 // arg is the reset pin
-Adafruit_Soundboard sfx = Adafruit_Soundboard(&ss, NULL, SFX_RST);
+Adafruit_Soundboard sfx(&ss, NULL, SFX_RST);
+
 // can also try hardware serial with
-// Adafruit_Soundboard sfx = Adafruit_Soundboard(&Serial1, NULL, SFX_RST);
+// Adafruit_Soundboard sfx(&Serial1, NULL, SFX_RST);
+
+static const int MAX_FILES = 25;
+FileInfo fileInfo[MAX_FILES];
 
 void setup() {
   Serial.begin(115200);
@@ -48,10 +52,10 @@ void setup() {
   sfx.setVol(180);
 }
 
-void fileListItem(uint8_t id, const char* fileName, uint32_t fileSize){
+void fileListItem(uint8_t id, const FileInfo& info){
   Serial.print(id); 
-  Serial.print("\tname: "); Serial.print(fileName);
-  Serial.print("\tsize: "); Serial.println(fileSize);
+  Serial.print("\tname: "); Serial.print(info.filename);
+  Serial.print("\tsize: "); Serial.println(info.size);
 }
 
 void loop() {
@@ -87,7 +91,19 @@ void loop() {
     case 'L': {
       Serial.println("File Listing");
       Serial.println("========================");
-      uint8_t nFiles = sfx.listFiles(fileListItem);
+
+      // 2 ways to do the same thing.
+#if 0
+      int nFiles = sfx.listFiles(fileInfo, MAX_FILES, 0);
+      for(int i = 0; i < nFiles; i++) {
+        Serial.print(i); 
+        Serial.print("\tname: "); Serial.print(fileInfo[i].filename);
+        Serial.print("\tsize: "); Serial.println(fileInfo[i].size);
+      }
+#else
+      int nFiles = sfx.listFiles(0, 0, fileListItem);
+#endif
+      
       Serial.print("Found "); Serial.print(nFiles); Serial.println(" Files");
       Serial.println("========================");  
       break; 
@@ -142,6 +158,7 @@ void loop() {
    case 'V': {
       Serial.println("Vol...");
       uint8_t v = readnumber();
+      sfx.setVol(v);
       Serial.print("Volume: "); 
       Serial.println(v);
       break;

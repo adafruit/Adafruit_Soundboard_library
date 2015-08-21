@@ -24,7 +24,13 @@
 
 #include "Arduino.h"
 
-typedef void (*fileListHandler)(uint8_t id, const char* fileName, uint32_t fileSize);
+struct FileInfo
+{
+  char      filename[12];
+  uint32_t  size;
+};
+
+typedef void (*fileListHandler)(uint8_t id, const FileInfo& fileInfo);
 
 class Adafruit_Soundboard : public Print {
  public:
@@ -33,7 +39,17 @@ class Adafruit_Soundboard : public Print {
   boolean reset(void);
 
   int     readLine(void);
-  uint8_t listFiles(fileListHandler handler);
+  /**
+   *  Gets a list of files. You may pass in:
+   *  - a pointer to an array of FileInfo structures, and the size
+   *    (nInfoArr) of that array. listFiles() will fill in the 
+   *    filenames and size of the files.
+   * - a callback function to be called for each file in the list.
+   * 
+   * You may pass in either, both, or neither. The number of files
+   * is returned.
+   */
+  uint8_t listFiles(FileInfo* infoArr, int nInfoArr, fileListHandler handler);
 
   uint8_t volUp(void);
   uint8_t volDown(void);

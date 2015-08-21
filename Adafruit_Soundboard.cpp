@@ -90,7 +90,7 @@ boolean Adafruit_Soundboard::reset(void) {
 
 
 // Query the board for the # of files and names/sizes
-uint8_t Adafruit_Soundboard::listFiles(fileListHandler handler) {
+uint8_t Adafruit_Soundboard::listFiles(FileInfo* infoArr, int nInfoArr, fileListHandler handler) {
   uint32_t filesize;
 
   while (stream->available())
@@ -99,6 +99,7 @@ uint8_t Adafruit_Soundboard::listFiles(fileListHandler handler) {
   stream->println('L'); // 'L' for 'l'ist
 
   uint8_t nFiles = 0;
+  FileInfo info;
   
   while (stream->readBytesUntil('\n', line_buffer, LINE_BUFFER_SIZE)) {
     const char* filename = line_buffer;
@@ -114,7 +115,15 @@ uint8_t Adafruit_Soundboard::listFiles(fileListHandler handler) {
        size *= 10;
        size += c - '0';
     }
-    handler(nFiles, filename, size);
+
+    memcpy(info.filename, line_buffer, 12);
+    info.size = size;
+
+    if (infoArr && nFiles < nInfoArr)
+      infoArr[nFiles] = info;
+    if (handler)
+      handler(nFiles, info);
+
     nFiles++;
   }
   return nFiles;
