@@ -23,14 +23,18 @@
 // You can also monitor the ACT pin for when audio is playing!
 
 // we'll be using software serial
-SoftwareSerial ss = SoftwareSerial(SFX_TX, SFX_RX);
+SoftwareSerial ss(SFX_TX, SFX_RX);
 
 // pass the software serial to Adafruit_soundboard, the second
 // argument is the debug port (not used really) and the third 
 // arg is the reset pin
-Adafruit_Soundboard sfx = Adafruit_Soundboard(&ss, NULL, SFX_RST);
+Adafruit_Soundboard sfx(&ss, NULL, SFX_RST);
+
 // can also try hardware serial with
-// Adafruit_Soundboard sfx = Adafruit_Soundboard(&Serial1, NULL, SFX_RST);
+// Adafruit_Soundboard sfx(&Serial1, NULL, SFX_RST);
+
+static const int MAX_FILES = 25;
+FileInfo fileInfo[MAX_FILES];
 
 void setup() {
   Serial.begin(115200);
@@ -45,8 +49,14 @@ void setup() {
     while (1);
   }
   Serial.println("SFX board found");
+  sfx.setVol(180);
 }
 
+void fileListItem(uint8_t id, const FileInfo& info){
+  Serial.print(id); 
+  Serial.print("\tname: "); Serial.print(info.filename);
+  Serial.print("\tsize: "); Serial.println(info.size);
+}
 
 void loop() {
   flushInput();
@@ -55,6 +65,7 @@ void loop() {
   Serial.println(F("[r] - reset"));
   Serial.println(F("[+] - Vol +"));
   Serial.println(F("[-] - Vol -"));
+  Serial.println(F("[V] - set volume (0-204)"));
   Serial.println(F("[L] - List files"));
   Serial.println(F("[P] - play by file name"));
   Serial.println(F("[#] - play by file number"));
@@ -78,18 +89,23 @@ void loop() {
     }
     
     case 'L': {
-      uint8_t files = sfx.listFiles();
-    
       Serial.println("File Listing");
       Serial.println("========================");
-      Serial.println();
-      Serial.print("Found "); Serial.print(files); Serial.println(" Files");
-      for (uint8_t f=0; f<files; f++) {
-        Serial.print(f); 
-        Serial.print("\tname: "); Serial.print(sfx.fileName(f));
-        Serial.print("\tsize: "); Serial.println(sfx.fileSize(f));
+
+      // 2 ways to do the same thing.
+#if 0
+      int nFiles = sfx.listFiles(fileInfo, MAX_FILES, 0);
+      for(int i = 0; i < nFiles; i++) {
+        Serial.print(i); 
+        Serial.print("\tname: "); Serial.print(fileInfo[i].filename);
+        Serial.print("\tsize: "); Serial.println(fileInfo[i].size);
       }
-      Serial.println("========================");
+#else
+      int nFiles = sfx.listFiles(0, 0, fileListItem);
+#endif
+      
+      Serial.print("Found "); Serial.print(nFiles); Serial.println(" Files");
+      Serial.println("========================");  
       break; 
     }
     
@@ -138,6 +154,15 @@ void loop() {
       }
       break;
    }
+
+   case 'V': {
+      Serial.println("Vol...");
+      uint8_t v = readnumber();
+      sfx.setVol(v);
+      Serial.print("Volume: "); 
+      Serial.println(v);
+      break;
+    }
    
    case '=': {
       Serial.println("Pausing...");
