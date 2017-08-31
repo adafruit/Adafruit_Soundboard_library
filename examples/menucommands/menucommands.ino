@@ -98,7 +98,7 @@ void loop() {
       uint8_t n = readnumber();
 
       Serial.print("\nPlaying track #"); Serial.println(n);
-      if (! sfx.playTrack(n) ) {
+      if (! sfx.playTrack((uint8_t)n) ) {
         Serial.println("Failed to play track?");
       }
       break;
