@@ -12,6 +12,22 @@ This is a library for the Adafruit Audio FX Sound Boards in UART mode
 Check out the links above for our tutorials and wiring diagrams
 This sound fx driver uses TTL Serial to communicate
 
+This is a list of the UART strings that will trigger actions on the Sound Board. For more details, see [Adafruit_Soundboard.cpp](Adafruit_Soundboard.cpp) (all commands must be followed by a carriage return character (`\r`) and then a new line character(`\n`), just like Serial.println())
+
+| ASCII Character(s) sent to Sound Board | Description |
+| :---: | :---: |
+| `L` | [return a list of all the files on the Sound Board over the serial connection](Adafruit_Soundboard.cpp#L94) | 
+| `#{n}` | [play song number "{n}"](Adafruit_Soundboard.cpp#L142) | 
+| `P{name}` | [play song with a name of "{name}"](Adafruit_Soundboard.cpp#L170) | 
+| `+` | [increase the volume](Adafruit_Soundboard.cpp#L195) | 
+| `-` | [decrease the volume](Adafruit_Soundboard.cpp#L208) | 
+| `=` | [pause playback](Adafruit_Soundboard.cpp#L221) | 
+| `>` | [resume playback](Adafruit_Soundboard.cpp#L235) | 
+| `q` | [stop playback](Adafruit_Soundboard.cpp#L248) | 
+| `t` | [return the current time in the track and the total time of the track in seconds over the serial connection](Adafruit_Soundboard.cpp#L262) | 
+| `s` | [return the remaining size of the track and the total size of the track in bytes over the serial connection](Adafruit_Soundboard.cpp#L277) | 
+
+
 Adafruit invests time and resources providing this open source code,
 please support Adafruit and open-source hardware by purchasing
 products from Adafruit!
