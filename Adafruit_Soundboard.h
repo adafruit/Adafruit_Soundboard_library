@@ -1,4 +1,4 @@
-/*************************************************** 
+/***************************************************
   This is a library for the Adafruit Sound Boards in UART mode
 
   ----> http://www.adafruit.com/products/2342
@@ -55,7 +55,7 @@ class Adafruit_Soundboard : public Print {
  private:
   Stream   *stream;     // -> sound board, e.g. SoftwareSerial or Serial1
   Stream    *debug;      // -> host, e.g. Serial
-  
+
   int8_t reset_pin;
   char line_buffer[LINE_BUFFER_SIZE];
   boolean writing;
@@ -67,5 +67,6 @@ class Adafruit_Soundboard : public Print {
 
 
   virtual size_t write(uint8_t); // Because Print subclass
+  virtual size_t write(const uint8_t *buffer, size_t size);
 };
 #endif

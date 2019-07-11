@@ -1,4 +1,4 @@
-/*************************************************** 
+/***************************************************
   This is a library for the Adafruit Sound Boards in UART mode
 
   ----> http://www.adafruit.com/products/2342
@@ -24,8 +24,8 @@
 //#define DEBUG 1
 
 // Constructor
-Adafruit_Soundboard::Adafruit_Soundboard(Stream *s, Stream *d, int8_t r) 
-  : stream(s), debug(d), reset_pin(r) 
+Adafruit_Soundboard::Adafruit_Soundboard(Stream *s, Stream *d, int8_t r)
+  : stream(s), debug(d), reset_pin(r)
 {
   stream->setTimeout(500);
   writing = false;
@@ -39,6 +39,9 @@ int Adafruit_Soundboard::readLine(void) {
 
   if (stream->peek() == '\r') stream->read();
   //stream->readBytesUntil('\r', line_buffer, LINE_BUFFER_SIZE);
+  if(debug) {
+    Serial.print(F("---> ")); Serial.println(line_buffer);
+  }
   return x;
 }
 
@@ -48,12 +51,20 @@ int Adafruit_Soundboard::readLine(void) {
 size_t Adafruit_Soundboard::write(uint8_t c) {
   if(debug) {
     if(!writing) {
-      debug->print(F("---> "));
+      debug->print(F("<--- "));
       writing = true;
     }
     debug->write(c);
   }
   return stream->write(c);
+}
+
+size_t Adafruit_Soundboard::write(const uint8_t *buffer, size_t size) {
+  size_t n = Print::write(buffer, size);
+  if (strcmp(buffer, "\r\n") == 0) {
+    writing = false;
+  }
+  return n;
 }
 
 // Do a hard reset by bringing the RST pin low
@@ -64,18 +75,13 @@ boolean Adafruit_Soundboard::reset(void) {
   delay(10);
   pinMode(reset_pin, INPUT);
   delay(1000); // give a bit of time to 'boot up'
-  
+
   // eat new line
   readLine();
-#ifdef DEBUG
-  Serial.println(line_buffer);   // Date and name
-#endif
 
   readLine();
   // "Adafruit FX Sound Board 9/10/14"
-#ifdef DEBUG
-  Serial.println(line_buffer);   // Date and name
-#endif
+
   if (! strstr(line_buffer, "Adafruit FX Sound Board")) return false;
 
   delay(250);
@@ -84,7 +90,7 @@ boolean Adafruit_Soundboard::reset(void) {
   //Serial.print("3>"); Serial.println(line_buffer);   // FAT type
   readLine();
   //Serial.print("4>"); Serial.println(line_buffer);   // # of files
-  
+
   return true;
 }
 
@@ -97,13 +103,13 @@ uint8_t Adafruit_Soundboard::listFiles(void) {
   while (stream->available())
     stream->read();
 
-  stream->println('L'); // 'L' for 'l'ist
+  println('L'); // 'L' for 'l'ist
 
   files=0;
-  
-  while (stream->readBytesUntil('\n', line_buffer, LINE_BUFFER_SIZE)) {
+
+  while (readLine()) {
     // copy over the file name
-    memcpy(filenames[files], line_buffer, 12); 
+    memcpy(filenames[files], line_buffer, 12);
     filenames[files][11] = 0;
 
     // parse out the file size after the name + tab
@@ -113,12 +119,12 @@ uint8_t Adafruit_Soundboard::listFiles(void) {
        if ((c > '9') || (c < '0')) {
            break;
        }
-       
+
        filesizes[files] *= 10;
-       
+
        filesizes[files] += c - '0';
     }
-    
+
     files++;
     if (files >= MAXFILES) break;
   }
@@ -143,15 +149,11 @@ boolean Adafruit_Soundboard::playTrack(uint8_t n) {
   while (stream->available())
     stream->read();
 
-  stream->print("#"); stream->println(n);
+  print("#"); println(n);
 
   readLine();  // eat return
 
   readLine();
-
-#ifdef DEBUG
-  Serial.print("<---"); Serial.println(line_buffer);
-#endif
 
   // check we got "play" back
   if (strstr(line_buffer, "play") == 0) {
@@ -159,9 +161,7 @@ boolean Adafruit_Soundboard::playTrack(uint8_t n) {
   }
   // check the # is correct
   int playing = atoi(line_buffer+5);
-#ifdef DEBUG
-  Serial.print("# = "); Serial.println(playing);
-#endif
+
   if (n != playing) return false;
 
   return true;
@@ -171,18 +171,12 @@ boolean Adafruit_Soundboard::playTrack(char *name) {
   while (stream->available())
     stream->read();
 
-  stream->print("P"); stream->println(name);
+  print("P"); println(name);
 
   readLine();  // eat return
-#ifdef DEBUG
-  Serial.print("\n\r<--- "); Serial.println(line_buffer);
-#endif
 
   readLine();
 
-#ifdef DEBUG
-  Serial.print("\n\r<--- "); Serial.println(line_buffer);
-#endif
 
   // check we got "play" back
   if (strstr(line_buffer, "play") == 0) {
@@ -196,7 +190,7 @@ uint8_t Adafruit_Soundboard::volUp() {
   while (stream->available())
     stream->read();
 
-  stream->println("+");
+  println("+");
   readLine();
   //Serial.println(line_buffer);
 
@@ -209,7 +203,7 @@ uint8_t Adafruit_Soundboard::volDown() {
   while (stream->available())
     stream->read();
 
-  stream->println("-");
+  println("-");
   readLine();
   //Serial.println(line_buffer);
 
@@ -222,8 +216,8 @@ boolean Adafruit_Soundboard::pause() {
   while (stream->available())
     stream->read();
 
-  stream->print("=");
-  if (! stream->readBytes(line_buffer, 1)) 
+  println("=");
+  if (! readLine())
     return false;
 
   if (line_buffer[0] != '=')
@@ -236,8 +230,8 @@ boolean Adafruit_Soundboard::unpause() {
   while (stream->available())
     stream->read();
 
-  stream->print(">");
-  if (! stream->readBytes(line_buffer, 1)) 
+  println(">");
+  if (! readLine())
     return false;
 
   if (line_buffer[0] != '>')
@@ -249,10 +243,10 @@ boolean Adafruit_Soundboard::stop() {
   while (stream->available())
     stream->read();
 
-  stream->print("q");
+  println("q");
   readLine();
 
-  if (line_buffer[0] != 'q') 
+  if (line_buffer[0] != 'q')
     return false;
 
   return true;
@@ -263,7 +257,7 @@ boolean Adafruit_Soundboard::trackTime(uint32_t *current, uint32_t *total) {
   while (stream->available())
     stream->read();
 
-  stream->print('t');
+  println("t");
   readLine();
   //Serial.println(line_buffer);
   //Serial.println(strlen(line_buffer));
@@ -278,7 +272,7 @@ boolean Adafruit_Soundboard::trackSize(uint32_t *remain, uint32_t *total) {
   while (stream->available())
     stream->read();
 
-  stream->print('s');
+  println("s");
   readLine();
   //Serial.println(line_buffer);
   //Serial.println(strlen(line_buffer));
