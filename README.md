@@ -1,4 +1,4 @@
-# Adafruit_Soundboard_library
+# Adafruit_Soundboard_library [![Build Status](https://github.com/adafruit/Adafruit_Soundboard_library/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_Soundboard_library/actions)[![Documentation](https://github.com/adafruit/ci-arduino/blob/master/assets/doxygen_badge.svg)](http://adafruit.github.io/Adafruit_Soundboard_library/html/index.html)
 
 This is a library for the Adafruit Audio FX Sound Boards in UART mode
 
