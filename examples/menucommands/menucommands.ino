@@ -159,7 +159,8 @@ void loop() {
 
    case 't': {
       Serial.print("Track time: ");
-      uint32_t current, total;
+      uint32_t current = 0;
+	  uint32_t total = 0;
       if (! sfx.trackTime(&current, &total) ) Serial.println("Failed to query");
       Serial.print(current); Serial.println(" seconds");
       break;
@@ -167,7 +168,8 @@ void loop() {
 
    case 's': {
       Serial.print("Track size (bytes remaining/total): ");
-      uint32_t remain, total;
+      uint32_t remain = 0;
+	  uint32_t total = 0;
       if (! sfx.trackSize(&remain, &total) ) 
         Serial.println("Failed to query");
       Serial.print(remain); Serial.print("/"); Serial.println(total); 
