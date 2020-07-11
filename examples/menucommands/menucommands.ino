@@ -49,8 +49,7 @@ void setup() {
 
 
 void loop() {
-  flushInput();
-  
+
   Serial.println(F("What would you like to do?"));
   Serial.println(F("[r] - reset"));
   Serial.println(F("[+] - Vol +"));
@@ -64,12 +63,12 @@ void loop() {
   Serial.println(F("[t] - playtime status"));
   Serial.println(F("> "));
   
-  while (!Serial.available());
-  char cmd = Serial.read();
-  
-  flushInput();
-  
-  switch (cmd) {
+  // Read the response.  We will only use the first letter, read the line to clear everything sent (like the line return).
+  const uint8_t bufferSize = 20;
+  char lineBuffer[bufferSize];
+  readline(lineBuffer, bufferSize);
+
+  switch (lineBuffer[0]) {
     case 'r': {
       if (!sfx.reset()) {
         Serial.println("Reset failed");
@@ -106,11 +105,10 @@ void loop() {
     
     case 'P': {
       Serial.print("Enter track name (full 12 character name!) >");
-      char name[20];
-      readline(name, 20);
+      readline(lineBuffer, bufferSize);
 
-      Serial.print("\nPlaying track \""); Serial.print(name); Serial.print("\"");
-      if (! sfx.playTrack(name) ) {
+      Serial.print("\nPlaying track \""); Serial.print(lineBuffer); Serial.print("\"");
+      if (! sfx.playTrack(lineBuffer) ) {
         Serial.println("Failed to play track?");
       }
       break;
@@ -185,18 +183,6 @@ void loop() {
 
 
 /************************ MENU HELPERS ***************************/
-
-void flushInput() {
-  // Read all available serial input to flush pending data.
-  uint16_t timeoutloop = 0;
-  while (timeoutloop++ < 40) {
-    while(ss.available()) {
-      ss.read();
-      timeoutloop = 0;  // If char was received reset the timer
-    }
-    delay(1);
-  }
-}
 
 char readBlocking() {
   while (!Serial.available());
