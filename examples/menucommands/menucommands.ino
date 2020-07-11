@@ -71,7 +71,7 @@ void loop() {
   switch (lineBuffer[0]) {
     case 'r': {
       if (!sfx.reset()) {
-        Serial.println("Reset failed");
+        Serial.println(F("Reset failed"));
       }
       break; 
     }
@@ -79,97 +79,97 @@ void loop() {
     case 'L': {
       uint8_t files = sfx.listFiles();
     
-      Serial.println("File Listing");
-      Serial.println("========================");
+      Serial.println(F("File Listing"));
+      Serial.println(F("========================"));
       Serial.println();
-      Serial.print("Found "); Serial.print(files); Serial.println(" Files");
+      Serial.print(F("Found ")); Serial.print(files); Serial.println(F(" Files"));
       for (uint8_t f=0; f<files; f++) {
         Serial.print(f); 
-        Serial.print("\tname: "); Serial.print(sfx.fileName(f));
-        Serial.print("\tsize: "); Serial.println(sfx.fileSize(f));
+        Serial.print(F("\tname: ")); Serial.print(sfx.fileName(f));
+        Serial.print(F("\tsize: ")); Serial.println(sfx.fileSize(f));
       }
-      Serial.println("========================");
+      Serial.println(F("========================"));
       break; 
     }
     
     case '#': {
-      Serial.print("Enter track #");
+      Serial.print(F("Enter track #"));
       uint8_t n = readnumber();
 
-      Serial.print("\nPlaying track #"); Serial.println(n);
+      Serial.print(F("\nPlaying track #")); Serial.println(n);
       if (! sfx.playTrack((uint8_t)n) ) {
-        Serial.println("Failed to play track?");
+        Serial.println(F("Failed to play track?"));
       }
       break;
     }
     
     case 'P': {
-      Serial.print("Enter track name (full 12 character name!) >");
+      Serial.print(F("Enter track name (full 12 character name!) >"));
       readline(lineBuffer, bufferSize);
 
-      Serial.print("\nPlaying track \""); Serial.print(lineBuffer); Serial.print("\"");
+      Serial.print(F("\nPlaying track \"")); Serial.print(lineBuffer); Serial.print(F("\""));
       if (! sfx.playTrack(lineBuffer) ) {
-        Serial.println("Failed to play track?");
+        Serial.println(F("Failed to play track?"));
       }
       break;
    }
 
    case '+': {
-      Serial.println("Vol up...");
+      Serial.println(F("Vol up..."));
       uint16_t v;
       if (! (v = sfx.volUp()) ) {
-        Serial.println("Failed to adjust");
+        Serial.println(F("Failed to adjust"));
       } else {
-        Serial.print("Volume: "); Serial.println(v);
+        Serial.print(F("Volume: ")); Serial.println(v);
       }
       break;
    }
 
    case '-': {
-      Serial.println("Vol down...");
+      Serial.println(F("Vol down..."));
       uint16_t v;
       if (! (v=sfx.volDown()) ) {
-        Serial.println("Failed to adjust");
+        Serial.println(F("Failed to adjust"));
       } else { 
-        Serial.print("Volume: "); 
+        Serial.print(F("Volume: "));
         Serial.println(v);
       }
       break;
    }
    
    case '=': {
-      Serial.println("Pausing...");
-      if (! sfx.pause() ) Serial.println("Failed to pause");
+      Serial.println(F("Pausing..."));
+      if (! sfx.pause() ) Serial.println(F("Failed to pause"));
       break;
    }
    
    case '>': {
-      Serial.println("Unpausing...");
-      if (! sfx.unpause() ) Serial.println("Failed to unpause");
+      Serial.println(F("Unpausing..."));
+      if (! sfx.unpause() ) Serial.println(F("Failed to unpause"));
       break;
    }
    
    case 'q': {
-      Serial.println("Stopping...");
-      if (! sfx.stop() ) Serial.println("Failed to stop");
+      Serial.println(F("Stopping..."));
+      if (! sfx.stop() ) Serial.println(F("Failed to stop"));
       break;
    }  
 
    case 't': {
-      Serial.print("Track time: ");
+      Serial.print(F("Track time: "));
       uint32_t current = 0;
 	  uint32_t total = 0;
-      if (! sfx.trackTime(&current, &total) ) Serial.println("Failed to query");
-      Serial.print(current); Serial.println(" seconds");
+      if (! sfx.trackTime(&current, &total) ) Serial.println(F("Failed to query"));
+      Serial.print(current); Serial.println(F(" seconds"));
       break;
    }  
 
    case 's': {
-      Serial.print("Track size (bytes remaining/total): ");
+      Serial.print(F("Track size (bytes remaining/total): "));
       uint32_t remain = 0;
 	  uint32_t total = 0;
       if (! sfx.trackSize(&remain, &total) ) 
-        Serial.println("Failed to query");
+        Serial.println(F("Failed to query"));
       Serial.print(remain); Serial.print("/"); Serial.println(total); 
       break;
    }  
