@@ -221,7 +221,8 @@ uint8_t Adafruit_Soundboard::volUp() {
   while (stream->available())
     stream->read();
 
-  stream->println("+");
+  write("+");
+  write('\r');
   readLine();
   // Serial.println(line_buffer);
 
@@ -234,7 +235,8 @@ uint8_t Adafruit_Soundboard::volDown() {
   while (stream->available())
     stream->read();
 
-  stream->println("-");
+  write("-");
+  write('\r');
   readLine();
   // Serial.println(line_buffer);
 
