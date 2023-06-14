@@ -109,8 +109,7 @@ boolean Adafruit_Soundboard::reset(void) {
  * @return Returns the information about the files
  */
 uint8_t Adafruit_Soundboard::listFiles(void) {
-  uint32_t filesize;
-
+  
   while (stream->available())
     stream->read();
 
